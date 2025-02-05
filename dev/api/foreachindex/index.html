@@ -42,19 +42,24 @@ f(v1, v2)</code></pre><p>All GPU functions allow you to specify a block size - t
 
     # GPU settings
     block_size=256,
-)</code></pre><p>Parallelised <code>for</code> loop over the indices of an iterable.</p><p>It allows you to run normal Julia code on a GPU over multiple arrays - e.g. CuArray, ROCArray, MtlArray, oneArray - with one GPU thread per index.</p><p>On CPUs at most <code>max_tasks</code> threads are launched, or fewer such that each thread processes at least <code>min_elems</code> indices; if a single task ends up being needed, <code>f</code> is inlined and no thread is launched. Tune it to your function - the more expensive it is, the fewer elements are needed to amortise the cost of launching a thread (which is a few μs). The scheduler can be <code>:polyester</code> to use Polyester.jl cheap threads or <code>:threads</code> to use normal Julia threads; either can be faster depending on the function, but in general the latter is more composable.</p><p><strong>Examples</strong></p><p>Normally you would write a for loop like this:</p><pre><code class="language-julia hljs">x = Array(1:100)
-y = similar(x)
-for i in eachindex(x)
-    @inbounds y[i] = 2 * x[i] + 1
+)</code></pre><p>Parallelised <code>for</code> loop over the indices of an iterable.</p><p>It allows you to run normal Julia code on a GPU over multiple arrays - e.g. CuArray, ROCArray, MtlArray, oneArray - with one GPU thread per index.</p><p>On CPUs at most <code>max_tasks</code> threads are launched, or fewer such that each thread processes at least <code>min_elems</code> indices; if a single task ends up being needed, <code>f</code> is inlined and no thread is launched. Tune it to your function - the more expensive it is, the fewer elements are needed to amortise the cost of launching a thread (which is a few μs). The scheduler can be <code>:polyester</code> to use Polyester.jl cheap threads or <code>:threads</code> to use normal Julia threads; either can be faster depending on the function, but in general the latter is more composable.</p><p><strong>Examples</strong></p><p>Normally you would write a for loop like this:</p><pre><code class="language-julia hljs">function f()
+    x = Array(1:100)
+    y = similar(x)
+    for i in eachindex(x)
+        @inbounds y[i] = 2 * x[i] + 1
+    end
 end</code></pre><p>Using this function you can have the same for loop body over a GPU array:</p><pre><code class="language-julia hljs">using CUDA
 import AcceleratedKernels as AK
-const x = CuArray(1:100)
-const y = similar(x)
-AK.foreachindex(x) do i
-    @inbounds y[i] = 2 * x[i] + 1
+
+function f()
+    x = CuArray(1:100)
+    y = similar(x)
+    AK.foreachindex(x) do i
+        @inbounds y[i] = 2 * x[i] + 1
+    end
 end</code></pre><p>Note that the above code is pure arithmetic, which you can write directly (and on some platforms it may be faster) as:</p><pre><code class="language-julia hljs">using CUDA
 x = CuArray(1:100)
-y = 2 .* x .+ 1</code></pre><p><strong>Important note</strong>: to use this function on a GPU, the objects referenced inside the loop body must have known types - i.e. be inside a function, or <code>const</code> global objects; but you shouldn&#39;t use global objects anyways. For example:</p><pre><code class="language-julia hljs">using oneAPI
+y = 2 .* x .+ 1</code></pre><p><strong>Important note</strong>: to use this function on a GPU, the objects referenced inside the loop body must have known types - i.e. be inside a function. For example:</p><pre><code class="language-julia hljs">using oneAPI
 import AcceleratedKernels as AK
 
 x = oneArray(1:100)
@@ -71,7 +76,7 @@ function somecopy!(v)
     end
 end
 
-somecopy!(x)    # This works</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGPU/AcceleratedKernels.jl/blob/cf85ebd0de2735e1076cb079d6b2727382c96413/src/foreachindex.jl#L63-L140">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="AcceleratedKernels.foraxes" href="#AcceleratedKernels.foraxes"><code>AcceleratedKernels.foraxes</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">foraxes(
+somecopy!(x)    # This works</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGPU/AcceleratedKernels.jl/blob/66610690c135ffe3ad77489ecc64beed3c9debb6/src/foreachindex.jl#L63-L144">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="AcceleratedKernels.foraxes" href="#AcceleratedKernels.foraxes"><code>AcceleratedKernels.foraxes</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">foraxes(
     f, itr, dims::Union{Nothing, &lt;:Integer}=nothing, backend::Backend=get_backend(itr);
 
     # CPU settings
@@ -81,21 +86,26 @@ somecopy!(x)    # This works</code></pre></div><a class="docs-sourcelink" target
 
     # GPU settings
     block_size=256,
-)</code></pre><p>Parallelised <code>for</code> loop over the indices along axis <code>dims</code> of an iterable.</p><p>It allows you to run normal Julia code on a GPU over multiple arrays - e.g. CuArray, ROCArray, MtlArray, oneArray - with one GPU thread per index.</p><p>On CPUs at most <code>max_tasks</code> threads are launched, or fewer such that each thread processes at least <code>min_elems</code> indices; if a single task ends up being needed, <code>f</code> is inlined and no thread is launched. Tune it to your function - the more expensive it is, the fewer elements are needed to amortise the cost of launching a thread (which is a few μs). The scheduler can be <code>:polyester</code> to use Polyester.jl cheap threads or <code>:threads</code> to use normal Julia threads; either can be faster depending on the function, but in general the latter is more composable.</p><p><strong>Examples</strong></p><p>Normally you would write a for loop like this:</p><pre><code class="language-julia hljs">x = Array(reshape(1:30, 3, 10))
-y = similar(x)
-for i in axes(x, 2)
-    for j in axes(x, 1)
-        @inbounds y[j, i] = 2 * x[j, i] + 1
+)</code></pre><p>Parallelised <code>for</code> loop over the indices along axis <code>dims</code> of an iterable.</p><p>It allows you to run normal Julia code on a GPU over multiple arrays - e.g. CuArray, ROCArray, MtlArray, oneArray - with one GPU thread per index.</p><p>On CPUs at most <code>max_tasks</code> threads are launched, or fewer such that each thread processes at least <code>min_elems</code> indices; if a single task ends up being needed, <code>f</code> is inlined and no thread is launched. Tune it to your function - the more expensive it is, the fewer elements are needed to amortise the cost of launching a thread (which is a few μs). The scheduler can be <code>:polyester</code> to use Polyester.jl cheap threads or <code>:threads</code> to use normal Julia threads; either can be faster depending on the function, but in general the latter is more composable.</p><p><strong>Examples</strong></p><p>Normally you would write a for loop like this:</p><pre><code class="language-julia hljs">function f()
+    x = Array(reshape(1:30, 3, 10))
+    y = similar(x)
+    for i in axes(x, 2)
+        for j in axes(x, 1)
+            @inbounds y[j, i] = 2 * x[j, i] + 1
+        end
     end
 end</code></pre><p>Using this function you can have the same for loop body over a GPU array:</p><pre><code class="language-julia hljs">using CUDA
 import AcceleratedKernels as AK
-const x = CuArray(reshape(1:3000, 3, 1000))
-const y = similar(x)
-AK.foraxes(x, 2) do i
-    for j in axes(x, 1)
-        @inbounds y[j, i] = 2 * x[j, i] + 1
+
+function f()
+    x = CuArray(reshape(1:3000, 3, 1000))
+    y = similar(x)
+    AK.foraxes(x, 2) do i
+        for j in axes(x, 1)
+            @inbounds y[j, i] = 2 * x[j, i] + 1
+        end
     end
-end</code></pre><p><strong>Important note</strong>: to use this function on a GPU, the objects referenced inside the loop body must have known types - i.e. be inside a function, or <code>const</code> global objects; but you shouldn&#39;t use global objects anyways. For example:</p><pre><code class="language-julia hljs">using oneAPI
+end</code></pre><p><strong>Important note</strong>: to use this function on a GPU, the objects referenced inside the loop body must have known types - i.e. be inside a function. For example:</p><pre><code class="language-julia hljs">using oneAPI
 import AcceleratedKernels as AK
 
 x = oneArray(reshape(1:3000, 3, 1000))
@@ -112,4 +122,4 @@ function somecopy!(v)
     end
 end
 
-somecopy!(x)    # This works</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGPU/AcceleratedKernels.jl/blob/cf85ebd0de2735e1076cb079d6b2727382c96413/src/foreachindex.jl#L168-L241">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../using_backends/">« Using Different Backends</a><a class="docs-footer-nextpage" href="../map/">Map »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Tuesday 4 February 2025 15:32">Tuesday 4 February 2025</span>. Using Julia version 1.11.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+somecopy!(x)    # This works</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGPU/AcceleratedKernels.jl/blob/66610690c135ffe3ad77489ecc64beed3c9debb6/src/foreachindex.jl#L172-L249">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../using_backends/">« Using Different Backends</a><a class="docs-footer-nextpage" href="../map/">Map »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Wednesday 5 February 2025 02:17">Wednesday 5 February 2025</span>. Using Julia version 1.11.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
