@@ -454,28 +454,13 @@ function cumsum(
     src::AbstractArray, backend::Backend=get_backend(src);
     init=zero(eltype(src)),
     neutral=zero(eltype(src)),
-    dims::Union{Nothing, Int}=nothing,
-
-    # Algorithm choice
-    alg::AccumulateAlgorithm=DecoupledLookback(),
-
-    # GPU settings
-    block_size::Int=256,
-    temp::Union{Nothing, AbstractArray}=nothing,
-    temp_flags::Union{Nothing, AbstractArray}=nothing,
+    kwargs...
 )
     accumulate(
         +, src, backend;
-        init=init,
-        neutral=neutral,
-        dims=dims,
+        init, neutral,
         inclusive=true,
-
-        alg=alg,
-
-        block_size=block_size,
-        temp=temp,
-        temp_flags=temp_flags,
+        kwargs...
     )
 end
 
@@ -522,27 +507,12 @@ function cumprod(
     src::AbstractArray, backend::Backend=get_backend(src);
     init=one(eltype(src)),
     neutral=one(eltype(src)),
-    dims::Union{Nothing, Int}=nothing,
-
-    # Algorithm choice
-    alg::AccumulateAlgorithm=DecoupledLookback(),
-
-    # GPU settings
-    block_size::Int=256,
-    temp::Union{Nothing, AbstractArray}=nothing,
-    temp_flags::Union{Nothing, AbstractArray}=nothing,
+    kwargs...
 )
     accumulate(
         *, src, backend;
-        init=init,
-        neutral=neutral,
-        dims=dims,
+        init, neutral,
         inclusive=true,
-
-        alg=alg,
-
-        block_size=block_size,
-        temp=temp,
-        temp_flags=temp_flags,
+        kwargs...
     )
 end
