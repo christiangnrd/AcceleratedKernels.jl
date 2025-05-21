@@ -212,20 +212,16 @@ function _mapreduce_impl(
         if isnothing(dims)
             return mapreduce_1d(
                 f, op, src, backend;
-                init=init,
-                neutral=neutral,
-                block_size=block_size,
-                temp=temp,
-                switch_below=switch_below,
+                init, neutral,
+                block_size, temp,
+                switch_below,
             )
         else
             return mapreduce_nd(
                 f, op, src, backend;
-                init=init,
-                neutral=neutral,
-                dims=dims,
-                block_size=block_size,
-                temp=temp,
+                init, neutral,
+                dims, block_size,
+                temp,
             )
         end
     else
@@ -233,7 +229,7 @@ function _mapreduce_impl(
             num_elems = length(src)
             num_tasks = min(max_tasks, num_elems ÷ min_elems)
             if num_tasks <= 1
-                return Base.mapreduce(f, op, src; init=init)
+                return Base.mapreduce(f, op, src; init)
             end
             return op(init, OMT.tmapreduce(
                 f, op, src; init=neutral,
@@ -243,7 +239,7 @@ function _mapreduce_impl(
             ))
         else
             # FIXME: waiting on OhMyThreads.jl for n-dimensional reduction
-            return Base.mapreduce(f, op, src; init=init, dims=dims)
+            return Base.mapreduce(f, op, src; init, dims)
         end
     end
 end

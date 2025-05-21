@@ -283,7 +283,7 @@ function count(
 )
     mapreduce(
         x -> x ? one(typeof(init)) : zero(typeof(init)), +, src, backend;
-        init=init,
+        init,
         neutral=zero(typeof(init)),
         kwargs...
     )
