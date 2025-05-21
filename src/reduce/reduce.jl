@@ -87,30 +87,12 @@ mcolsum = AK.reduce(+, m; init=zero(eltype(m)), dims=2)
 function reduce(
     op, src::AbstractArray, backend::Backend=get_backend(src);
     init,
-    neutral=neutral_element(op, eltype(src)),
-    dims::Union{Nothing, Int}=nothing,
-
-    # CPU settings
-    scheduler=:static,
-    max_tasks=Threads.nthreads(),
-    min_elems=1,
-
-    # GPU settings
-    block_size::Int=256,
-    temp::Union{Nothing, AbstractArray}=nothing,
-    switch_below::Int=0,
+    kwargs...
 )
     _reduce_impl(
         op, src, backend;
-        init=init,
-        neutral=neutral,
-        dims=dims,
-        scheduler=scheduler,
-        max_tasks=max_tasks,
-        min_elems=min_elems,
-        block_size=block_size,
-        temp=temp,
-        switch_below=switch_below,
+        init,
+        kwargs...
     )
 end
 
@@ -118,30 +100,12 @@ end
 function _reduce_impl(
     op, src::AbstractArray, backend;
     init,
-    neutral=neutral_element(op, eltype(src)),
-    dims::Union{Nothing, Int}=nothing,
-
-    # CPU settings
-    scheduler=:static,
-    max_tasks=Threads.nthreads(),
-    min_elems=1,
-
-    # GPU settings
-    block_size::Int=256,
-    temp::Union{Nothing, AbstractArray}=nothing,
-    switch_below::Int=0,
+    kwargs...
 )
     _mapreduce_impl(
         identity, op, src, backend;
-        init=init,
-        neutral=neutral,
-        dims=dims,
-        scheduler=scheduler,
-        max_tasks=max_tasks,
-        min_elems=min_elems,
-        block_size=block_size,
-        temp=temp,
-        switch_below=switch_below,
+        init,
+        kwargs...
     )
 end
 
@@ -218,30 +182,12 @@ mcolsumsq = AK.mapreduce(f, +, m; init=zero(eltype(m)), dims=2)
 function mapreduce(
     f, op, src::AbstractArray, backend::Backend=get_backend(src);
     init,
-    neutral=neutral_element(op, eltype(src)),
-    dims::Union{Nothing, Int}=nothing,
-
-    # CPU settings
-    scheduler=:static,
-    max_tasks=Threads.nthreads(),
-    min_elems=1,
-
-    # GPU settings
-    block_size::Int=256,
-    temp::Union{Nothing, AbstractArray}=nothing,
-    switch_below::Int=0,
+    kwargs...
 )
     _mapreduce_impl(
         f, op, src, backend;
-        init=init,
-        neutral=neutral,
-        dims=dims,
-        scheduler=scheduler,
-        max_tasks=max_tasks,
-        min_elems=min_elems,
-        block_size=block_size,
-        temp=temp,
-        switch_below=switch_below,
+        init,
+        kwargs...
     )
 end
 
