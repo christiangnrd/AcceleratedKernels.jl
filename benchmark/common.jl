@@ -40,7 +40,11 @@ println("Using ArrayType: ", ArrayType)
 
 # To run all benchmarks
 # begin
-#     benches = filter(x -> x ∉ ["Manifest.toml", "Project.toml", "common.jl"], Base.readdir())
+#     include("common.jl")
+#     noinclude = ["Manifest.toml", "Project.toml", "common.jl"]
+#     @isdefined(MtlArray) && append!(noinclude, ["sort.jl", "sortperm.jl"])
+#     @isdefined(CuArray) && append!(noinclude, ["sortperm.jl"])
+#     benches = filter(x -> x ∉ noinclude, Base.readdir())
 #     for b in benches
 #         include(b)
 #     end
