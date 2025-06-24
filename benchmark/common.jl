@@ -10,12 +10,6 @@ macro default_sync(ex)
     :($(esc(ex)))
 end
 
-# macro default_sync(ex)
-#     quote
-#         $(esc(ex))
-#     end
-# end
-
 # Choose the Array backend:
 #
 # using CUDA
