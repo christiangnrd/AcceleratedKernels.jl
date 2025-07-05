@@ -71,7 +71,7 @@ jobs:
       actions: write
       contents: read
     strategy:
-      fail-fast: false
+      fail-fast: true
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -93,7 +93,7 @@ jobs:
       actions: write
       contents: read
     strategy:
-      fail-fast: false
+      fail-fast: true
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
