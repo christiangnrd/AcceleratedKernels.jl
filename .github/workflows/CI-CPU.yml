@@ -102,8 +102,6 @@ jobs:
           arch: x64
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
-      # - run: sed -i 's/^KernelAbstractions = "0\.9.*"/KernelAbstractions = "0.10"/' ./Project.toml
-      # - run: julia --project -e'using Pkg; pkg"dev KernelAbstractions"'
       - uses: julia-actions/julia-runtest@v1
         with:
           test_args: '--OpenCL'
